@@ -241,7 +241,37 @@ const ERC20_ABI = [
 "function decimals() view returns (uint8)"
 ];
 
-const readProvider = new ethers.JsonRpcProvider(ARC_RPC_URL, undefined, { batchMaxCount: 1 });
+function createThrottledProvider(url){
+const p = new ethers.JsonRpcProvider(url, undefined, { batchMaxCount: 1 });
+const originalSend = p.send.bind(p);
+let queue = Promise.resolve();
+const MIN_DELAY_MS = 220;
+p.send = function(method, params){
+const resultPromise = queue.then(async function(){
+async function attempt(retriesLeft){
+try{
+const result = await originalSend(method, params);
+await new Promise(function(r){ setTimeout(r, MIN_DELAY_MS); });
+return result;
+}catch(err){
+const msg = (err && err.message) || '';
+const code = (err && err.code) || (err && err.error && err.error.code);
+const isRateLimited = code === -32005 || /429|rate limit/i.test(msg);
+if(isRateLimited && retriesLeft > 0){
+await new Promise(function(r){ setTimeout(r, 900); });
+return attempt(retriesLeft - 1);
+}
+throw err;
+}
+}
+return attempt(5);
+});
+queue = resultPromise.catch(function(){});
+return resultPromise;
+};
+return p;
+}
+const readProvider = createThrottledProvider(ARC_RPC_URL);
 
 async function getRecentFromBlock(){
 try{
