@@ -2,929 +2,849 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Arcolyte</title>
+<title>Olyte</title>
 </head>
 <body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.5/ethers.umd.min.js"></script>
-
 <style>
-  html,body{margin:0;background:#f6f4ef;min-height:100%;}
-  :root{
-    --ink:#f6f4ef; --surface:#ffffff; --surface-2:#f1efe8; --line:#e3ddd0;
-    --mint:#2f5fd8; --mint-dim:#e8edfb; --blue:#2f5fd8;
-    --text:#1c1c1a; --muted:#8a8477; --red:#c23b32;
-    --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif;
-  }
-  *{box-sizing:border-box;}
-  .amm-app{font-family:var(--sans); background:radial-gradient(circle at 20% -10%, #eef1fb 0%, var(--ink) 45%); color:var(--text); min-height:100vh; padding-bottom:40px;}
-
-  .amm-header{border-bottom:1px solid var(--line); padding:16px 24px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:rgba(246,244,239,0.92); backdrop-filter:blur(6px); z-index:10;}
-  .amm-brand{display:flex; align-items:center; gap:10px;}
-  .amm-mark{width:28px;height:28px;border-radius:8px;background:var(--surface-2); border:1px solid var(--line); display:flex; align-items:center; justify-content:center;}
-  .amm-brand-text{font-family:var(--mono); font-size:14px; letter-spacing:0.06em; color:var(--text); text-transform:uppercase; font-weight:600;}
-  .amm-brand-sub{font-family:var(--mono); font-size:10.5px; color:var(--muted); margin-left:8px;}
-
-  .amm-connect-btn{border:none; border-radius:10px; padding:10px 18px; font-family:var(--sans); font-size:13.5px; font-weight:600; cursor:pointer; background:var(--mint); color:#ffffff;}
-  .amm-connected-pill{display:flex; align-items:center; gap:8px; font-family:var(--mono); font-size:12.5px; color:var(--text); background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:9px 14px;}
-  .amm-dot{width:7px;height:7px;border-radius:50%; background:var(--mint);}
-
-  .amm-shell{max-width:820px; margin:0 auto; padding:28px 20px 0;}
-
-  .amm-hero{padding:6px 4px 26px;}
-  .amm-hero-title{font-size:26px; font-weight:700; margin:0 0 8px; letter-spacing:-0.01em;}
-  .amm-hero-sub{font-size:14.5px; color:var(--muted); margin:0; max-width:580px; line-height:1.6;}
-
-  .amm-card{background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:22px; margin-bottom:16px;}
-  .amm-title{font-size:18px; font-weight:650; margin:0 0 4px;}
-  .amm-sub{font-size:13px; color:var(--muted); margin:0 0 16px; line-height:1.55;}
-
-  .amm-btn{border:none; border-radius:11px; padding:11px 15px; font-family:var(--sans); font-size:13.5px; font-weight:600; cursor:pointer;}
-  .amm-btn:disabled{opacity:0.5; cursor:not-allowed;}
-  .amm-btn-primary{background:var(--mint); color:#ffffff;}
-  .amm-btn-ghost{background:var(--surface-2); color:var(--text); border:1px solid var(--line);}
-  .amm-btn-block{width:100%;}
-
-  .amm-tabs{display:flex; gap:6px; margin-bottom:16px; border-bottom:1px solid var(--line); overflow-x:auto;}
-  .amm-tab{background:none; border:none; color:var(--muted); font-family:var(--sans); font-size:13.5px; font-weight:600; padding:10px 14px; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap;}
-  .amm-tab.active{color:var(--mint); border-bottom-color:var(--mint);}
-
-  .amm-field{margin-bottom:13px;}
-  .amm-label{font-family:var(--mono); font-size:11px; letter-spacing:0.05em; color:var(--muted); text-transform:uppercase; margin-bottom:6px; display:block;}
-  .amm-input{width:100%; background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:11px 13px; color:var(--text); font-family:var(--mono); font-size:13.5px; outline:none;}
-  .amm-input:focus{border-color:var(--mint);}
-  .amm-hint{font-size:12px; color:var(--muted); line-height:1.5; margin-top:10px;}
-
-  .amm-pool{background:var(--surface-2); border:1px solid var(--line); border-radius:13px; padding:16px; margin-bottom:12px;}
-  .amm-pool-head{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;}
-  .amm-pool-name{font-size:15px; font-weight:650;}
-  .amm-pool-meta{font-family:var(--mono); font-size:11px; color:var(--muted); margin-top:2px;}
-  .amm-pool-reserves{font-family:var(--mono); font-size:12px; color:var(--muted); margin-top:10px;}
-  .amm-pool-reserves b{color:var(--text);}
-
-  .amm-subtabs{display:flex; gap:6px; margin:14px 0 12px; border-bottom:1px solid var(--line);}
-  .amm-subtab{background:none; border:none; color:var(--muted); font-family:var(--sans); font-size:12.5px; font-weight:600; padding:7px 10px; cursor:pointer; border-bottom:2px solid transparent;}
-  .amm-subtab.active{color:var(--mint); border-bottom-color:var(--mint);}
-
-  .amm-row{display:flex; gap:8px; align-items:center;}
-
-  .amm-dir-row{display:flex; gap:8px; margin-bottom:14px;}
-  .amm-dir-btn{flex:1; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:9px 10px; font-family:var(--sans); font-size:12.5px; font-weight:600; color:var(--muted); cursor:pointer;}
-  .amm-dir-btn.active{background:var(--mint-dim); border-color:#b9c8f2; color:var(--mint);}
-  .amm-row input{flex:1;}
-
-  .amm-status{font-family:var(--mono); font-size:12px; border-radius:9px; padding:9px 11px; margin-top:10px; display:none; line-height:1.5; word-break:break-all;}
-  .amm-status.show{display:block;}
-  .amm-status.ok{background:var(--mint-dim); border:1px solid #b9c8f2; color:var(--mint);}
-  .amm-status.err{background:#fbe9e7; border:1px solid #f0c4bd; color:var(--red);}
-  .amm-status.pending{background:var(--surface-2); border:1px solid var(--line); color:var(--muted);}
-
-  .amm-empty{font-size:13px; color:var(--muted); text-align:center; padding:30px 10px; font-style:italic;}
-
-  .amm-gate{text-align:center; padding:40px 20px;}
-  .amm-gate p{color:var(--muted); font-size:13.5px; margin:0 0 16px;}
-
-  .amm-footer{text-align:center; font-size:11.5px; color:var(--muted); font-family:var(--mono); margin-top:30px; line-height:1.8; padding:0 20px;}
-  .amm-footer a{color:#5b8def;}
+html,body{margin:0;background:#f6f4ef;min-height:100%;}
+:root{
+--ink:#f6f4ef; --surface:#ffffff; --surface-2:#f1efe8; --line:#e3ddd0;
+--mint:#2f5fd8; --mint-dim:#e8edfb; --blue:#2f5fd8;
+--text:#1c1c1a; --muted:#8a8477; --red:#c23b32;
+--mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+--sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif;
+}
+*{box-sizing:border-box;}
+.amm-app{font-family:var(--sans); background:radial-gradient(circle at 20% -10%, #eef1fb 0%, var(--ink) 45%); color:var(--text); min-height:100vh; padding-bottom:40px;}
+.amm-header{border-bottom:1px solid var(--line); padding:16px 24px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:rgba(246,244,239,0.92); backdrop-filter:blur(6px); z-index:10;}
+.amm-brand{display:flex; align-items:center; gap:10px;}
+.amm-mark{width:28px;height:28px;border-radius:8px;background:var(--surface-2); border:1px solid var(--line); display:flex; align-items:center; justify-content:center;}
+.amm-brand-text{font-family:var(--mono); font-size:14px; letter-spacing:0.06em; color:var(--text); text-transform:uppercase; font-weight:600;}
+.amm-brand-sub{font-family:var(--mono); font-size:10.5px; color:var(--muted); margin-left:8px;}
+.amm-connect-btn{border:none; border-radius:10px; padding:10px 18px; font-family:var(--sans); font-size:13.5px; font-weight:600; cursor:pointer; background:var(--mint); color:#ffffff;}
+.amm-connected-pill{display:flex; align-items:center; gap:8px; font-family:var(--mono); font-size:12.5px; color:var(--text); background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:9px 14px;}
+.amm-dot{width:7px;height:7px;border-radius:50%; background:var(--mint);}
+.amm-shell{max-width:820px; margin:0 auto; padding:28px 20px 0;}
+.amm-hero{padding:6px 4px 26px;}
+.amm-hero-title{font-size:26px; font-weight:700; margin:0 0 8px; letter-spacing:-0.01em;}
+.amm-hero-sub{font-size:14.5px; color:var(--muted); margin:0; max-width:580px; line-height:1.6;}
+.amm-card{background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:22px; margin-bottom:16px;}
+.amm-title{font-size:18px; font-weight:650; margin:0 0 4px;}
+.amm-sub{font-size:13px; color:var(--muted); margin:0 0 16px; line-height:1.55;}
+.amm-btn{border:none; border-radius:11px; padding:11px 15px; font-family:var(--sans); font-size:13.5px; font-weight:600; cursor:pointer;}
+.amm-btn:disabled{opacity:0.5; cursor:not-allowed;}
+.amm-btn-primary{background:var(--mint); color:#ffffff;}
+.amm-btn-ghost{background:var(--surface-2); color:var(--text); border:1px solid var(--line);}
+.amm-btn-block{width:100%;}
+.amm-tabs{display:flex; gap:6px; margin-bottom:16px; border-bottom:1px solid var(--line); overflow-x:auto;}
+.amm-tab{background:none; border:none; color:var(--muted); font-family:var(--sans); font-size:13.5px; font-weight:600; padding:10px 14px; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap;}
+.amm-tab.active{color:var(--mint); border-bottom-color:var(--mint);}
+.amm-field{margin-bottom:13px;}
+.amm-label{font-family:var(--mono); font-size:11px; letter-spacing:0.05em; color:var(--muted); text-transform:uppercase; margin-bottom:6px; display:block;}
+.amm-input{width:100%; background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:11px 13px; color:var(--text); font-family:var(--mono); font-size:13.5px; outline:none;}
+.amm-input:focus{border-color:var(--mint);}
+.amm-hint{font-size:12px; color:var(--muted); line-height:1.5; margin-top:10px;}
+.amm-pool{background:var(--surface-2); border:1px solid var(--line); border-radius:13px; padding:16px; margin-bottom:12px;}
+.amm-pool-head{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;}
+.amm-pool-name{font-size:15px; font-weight:650;}
+.amm-pool-meta{font-family:var(--mono); font-size:11px; color:var(--muted); margin-top:2px;}
+.amm-pool-reserves{font-family:var(--mono); font-size:12px; color:var(--muted); margin-top:10px;}
+.amm-pool-reserves b{color:var(--text);}
+.amm-subtabs{display:flex; gap:6px; margin:14px 0 12px; border-bottom:1px solid var(--line);}
+.amm-subtab{background:none; border:none; color:var(--muted); font-family:var(--sans); font-size:12.5px; font-weight:600; padding:7px 10px; cursor:pointer; border-bottom:2px solid transparent;}
+.amm-subtab.active{color:var(--mint); border-bottom-color:var(--mint);}
+.amm-row{display:flex; gap:8px; align-items:center;}
+.amm-dir-row{display:flex; gap:8px; margin-bottom:14px;}
+.amm-dir-btn{flex:1; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:9px 10px; font-family:var(--sans); font-size:12.5px; font-weight:600; color:var(--muted); cursor:pointer;}
+.amm-dir-btn.active{background:var(--mint-dim); border-color:#b9c8f2; color:var(--mint);}
+.amm-row input{flex:1;}
+.amm-status{font-family:var(--mono); font-size:12px; border-radius:9px; padding:9px 11px; margin-top:10px; display:none; line-height:1.5; word-break:break-all;}
+.amm-status.show{display:block;}
+.amm-status.ok{background:var(--mint-dim); border:1px solid #b9c8f2; color:var(--mint);}
+.amm-status.err{background:#fbe9e7; border:1px solid #f0c4bd; color:var(--red);}
+.amm-status.pending{background:var(--surface-2); border:1px solid var(--line); color:var(--muted);}
+.amm-empty{font-size:13px; color:var(--muted); text-align:center; padding:30px 10px; font-style:italic;}
+.amm-gate{text-align:center; padding:40px 20px;}
+.amm-gate p{color:var(--muted); font-size:13.5px; margin:0 0 16px;}
+.amm-footer{text-align:center; font-size:11.5px; color:var(--muted); font-family:var(--mono); margin-top:30px; line-height:1.8; padding:0 20px;}
+.amm-footer a{color:#5b8def;}
 </style>
-
 <div class="amm-app">
-  <div class="amm-header">
-    <div class="amm-brand">
-      <div class="amm-mark">
-        <svg viewBox="0 0 32 32" width="20" height="20">
-          <defs>
-            <linearGradient id="ammMarkGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#3f8cff"/>
-              <stop offset="100%" stop-color="#7db3ff"/>
-            </linearGradient>
-          </defs>
-          <circle cx="11" cy="16" r="6" fill="none" stroke="url(#ammMarkGrad)" stroke-width="2.5"/>
-          <circle cx="21" cy="16" r="6" fill="none" stroke="url(#ammMarkGrad)" stroke-width="2.5"/>
-        </svg>
-      </div>
-      <span class="amm-brand-text">Arcolyte</span>
-      <span class="amm-brand-sub">Testnet</span>
-    </div>
-    <div id="ammConnectArea">
-      <button class="amm-btn amm-connect-btn" id="ammConnectBtn">Connect wallet</button>
-    </div>
-  </div>
-
-  <div class="amm-shell">
-
-    <div class="amm-hero">
-      <p class="amm-hero-title">Liquidity pools on Arc</p>
-      <p class="amm-hero-sub">Create a USDC pool for any token, provide liquidity and earn a share of every swap, or zap in with USDC only for a one-click balanced deposit.</p>
-    </div>
-
-    <div class="amm-tabs">
-      <button class="amm-tab active" data-tab="pools">Pools</button>
-      <button class="amm-tab" data-tab="launch">Create token</button>
-      <button class="amm-tab" data-tab="create">Create pool</button>
-      <button class="amm-tab" data-tab="portfolio">Portfolio</button>
-    </div>
-
-    <div id="ammTabPools">
-      <div class="amm-card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
-          <p class="amm-title" style="margin:0;">All pools</p>
-          <button class="amm-btn amm-btn-ghost" id="ammRefresh" style="padding:8px 12px; font-size:12.5px;">Refresh</button>
-        </div>
-        <p class="amm-sub">USDC paired with any token. Connect a wallet to trade or provide liquidity.</p>
-        <input class="amm-input" id="ammPoolSearch" placeholder="Search by token symbol or address" style="margin-bottom:14px;">
-        <div id="ammPoolsList">
-          <div class="amm-empty">Loading...</div>
-        </div>
-      </div>
-    </div>
-
-    <div id="ammTabLaunch" style="display:none;">
-      <div class="amm-card">
-        <div id="ammLaunchGate" class="amm-gate">
-          <p>Connect your wallet to create a token.</p>
-          <button class="amm-btn amm-btn-primary" id="ammConnectFromLaunch">Connect wallet</button>
-        </div>
-        <div id="ammLaunchContent" style="display:none;">
-          <p class="amm-title">Create your own token</p>
-          <p class="amm-sub">Deploys a real, standalone ERC-20 token. The full initial supply is minted to your wallet, fixed supply, no further minting.</p>
-          <div class="amm-field">
-            <span class="amm-label">Token name</span>
-            <input class="amm-input" id="ammLaunchName" placeholder="My Token">
-          </div>
-          <div class="amm-field">
-            <span class="amm-label">Symbol</span>
-            <input class="amm-input" id="ammLaunchSymbol" placeholder="MTK" maxlength="11">
-          </div>
-          <div class="amm-field">
-            <span class="amm-label">Initial supply</span>
-            <input class="amm-input" id="ammLaunchSupply" placeholder="1000000" inputmode="numeric">
-          </div>
-          <button class="amm-btn amm-btn-primary amm-btn-block" id="ammLaunchBtn">Create token</button>
-          <div class="amm-status" id="ammLaunchStatus"></div>
-          <div id="ammLaunchDoneBox" style="display:none; margin-top:16px; padding-top:16px; border-top:1px solid var(--line);">
-            <p class="amm-sub" style="margin-bottom:10px;">Token created. Next, open a pool for it so people can swap and add liquidity.</p>
-            <button class="amm-btn amm-btn-ghost amm-btn-block" id="ammLaunchCreatePoolBtn">Create a pool for this token</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div id="ammTabCreate" style="display:none;">
-      <div class="amm-card">
-        <div id="ammCreateGate" class="amm-gate">
-          <p>Connect your wallet to create a pool.</p>
-          <button class="amm-btn amm-btn-primary" id="ammConnectFromCreate">Connect wallet</button>
-        </div>
-        <div id="ammCreateContent" style="display:none;">
-          <p class="amm-title">Create a new pool</p>
-          <p class="amm-sub">Pairs any ERC-20 token on Arc Testnet against USDC. One pool per token. After creating it, add the first liquidity from the Pools tab.</p>
-          <div class="amm-field">
-            <span class="amm-label">Token contract address</span>
-            <input class="amm-input" id="ammNewTokenAddr" placeholder="0x...">
-          </div>
-          <button class="amm-btn amm-btn-primary amm-btn-block" id="ammCreatePoolBtn">Create pool</button>
-          <p class="amm-hint">Tip: paste the address of a token you made with a token factory, or any existing ERC-20 on Arc Testnet.</p>
-          <div class="amm-status" id="ammCreateStatus"></div>
-        </div>
-      </div>
-    </div>
-
-    <div id="ammTabPortfolio" style="display:none;">
-      <div class="amm-card">
-        <div id="ammPortfolioGate" class="amm-gate">
-          <p>Connect your wallet to see your portfolio.</p>
-          <button class="amm-btn amm-btn-primary" id="ammConnectFromPortfolio">Connect wallet</button>
-        </div>
-        <div id="ammPortfolioContent" style="display:none;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
-            <p class="amm-title" style="margin:0;">Your portfolio</p>
-            <button class="amm-btn amm-btn-ghost" id="ammRefreshPortfolio" style="padding:8px 12px; font-size:12.5px;">Refresh</button>
-          </div>
-          <p class="amm-sub">Your LP positions across every pool, valued in USDC at current pool prices.</p>
-          <div id="ammPortfolioTotal" style="font-family:var(--mono); font-size:26px; font-weight:700; margin-bottom:16px;">-</div>
-          <div id="ammPortfolioList"><div class="amm-empty">Loading...</div></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="amm-footer">
-      Testnet only, no real monetary value. 0.30% swap fee stays in each pool.<br>
-      <a href="https://faucet.circle.com" target="_blank" rel="noopener">Get test USDC</a> &middot;
-      <a href="https://testnet.arcscan.app" target="_blank" rel="noopener">Block explorer</a><br>
-      <a href="https://www.arc.network" target="_blank" rel="noopener">Arc website</a> &middot;
-      <a href="https://www.arc.network/blog" target="_blank" rel="noopener">Arc blog</a> &middot;
-      <a href="https://x.com/arc" target="_blank" rel="noopener">Arc on X</a> &middot;
-      <a href="https://discord.gg/buildonarc" target="_blank" rel="noopener">Arc Discord</a>
-    </div>
-  </div>
+<div class="amm-header">
+<div class="amm-brand">
+<div class="amm-mark">
+<svg viewBox="0 0 32 32" width="20" height="20">
+<defs>
+<linearGradient id="ammMarkGrad" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0%" stop-color="#3f8cff"/>
+<stop offset="100%" stop-color="#7db3ff"/>
+</linearGradient>
+</defs>
+<circle cx="11" cy="16" r="6" fill="none" stroke="url(#ammMarkGrad)" stroke-width="2.5"/>
+<circle cx="21" cy="16" r="6" fill="none" stroke="url(#ammMarkGrad)" stroke-width="2.5"/>
+</svg>
 </div>
-
+<span class="amm-brand-text">Olyte</span>
+<span class="amm-brand-sub">Testnet</span>
+</div>
+<div id="ammConnectArea">
+<button class="amm-btn amm-connect-btn" id="ammConnectBtn">Connect wallet</button>
+</div>
+</div>
+<div class="amm-shell">
+<div class="amm-hero">
+<p class="amm-hero-title">Liquidity pools on Arc</p>
+<p class="amm-hero-sub">Create a USDC pool for any token, provide liquidity and earn a share of every swap, or zap in with USDC only for a one-click balanced deposit.</p>
+</div>
+<div class="amm-tabs">
+<button class="amm-tab active" data-tab="pools">Pools</button>
+<button class="amm-tab" data-tab="launch">Create token</button>
+<button class="amm-tab" data-tab="create">Create pool</button>
+<button class="amm-tab" data-tab="portfolio">Portfolio</button>
+</div>
+<div id="ammTabPools">
+<div class="amm-card">
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
+<p class="amm-title" style="margin:0;">All pools</p>
+<button class="amm-btn amm-btn-ghost" id="ammRefresh" style="padding:8px 12px; font-size:12.5px;">Refresh</button>
+</div>
+<p class="amm-sub">USDC paired with any token. Connect a wallet to trade or provide liquidity.</p>
+<input class="amm-input" id="ammPoolSearch" placeholder="Search by token symbol or address" style="margin-bottom:14px;">
+<div id="ammPoolsList">
+<div class="amm-empty">Loading...</div>
+</div>
+</div>
+</div>
+<div id="ammTabLaunch" style="display:none;">
+<div class="amm-card">
+<div id="ammLaunchGate" class="amm-gate">
+<p>Connect your wallet to create a token.</p>
+<button class="amm-btn amm-btn-primary" id="ammConnectFromLaunch">Connect wallet</button>
+</div>
+<div id="ammLaunchContent" style="display:none;">
+<p class="amm-title">Create your own token</p>
+<p class="amm-sub">Deploys a real, standalone ERC-20 token. The full initial supply is minted to your wallet, fixed supply, no further minting.</p>
+<div class="amm-field">
+<span class="amm-label">Token name</span>
+<input class="amm-input" id="ammLaunchName" placeholder="My Token">
+</div>
+<div class="amm-field">
+<span class="amm-label">Symbol</span>
+<input class="amm-input" id="ammLaunchSymbol" placeholder="MTK" maxlength="11">
+</div>
+<div class="amm-field">
+<span class="amm-label">Initial supply</span>
+<input class="amm-input" id="ammLaunchSupply" placeholder="1000000" inputmode="numeric">
+</div>
+<button class="amm-btn amm-btn-primary amm-btn-block" id="ammLaunchBtn">Create token</button>
+<div class="amm-status" id="ammLaunchStatus"></div>
+<div id="ammLaunchDoneBox" style="display:none; margin-top:16px; padding-top:16px; border-top:1px solid var(--line);">
+<p class="amm-sub" style="margin-bottom:10px;">Token created. Next, open a pool for it so people can swap and add liquidity.</p>
+<button class="amm-btn amm-btn-ghost amm-btn-block" id="ammLaunchCreatePoolBtn">Create a pool for this token</button>
+</div>
+</div>
+</div>
+</div>
+<div id="ammTabCreate" style="display:none;">
+<div class="amm-card">
+<div id="ammCreateGate" class="amm-gate">
+<p>Connect your wallet to create a pool.</p>
+<button class="amm-btn amm-btn-primary" id="ammConnectFromCreate">Connect wallet</button>
+</div>
+<div id="ammCreateContent" style="display:none;">
+<p class="amm-title">Create a new pool</p>
+<p class="amm-sub">Pairs any ERC-20 token on Arc Testnet against USDC. One pool per token. After creating it, add the first liquidity from the Pools tab.</p>
+<div class="amm-field">
+<span class="amm-label">Token contract address</span>
+<input class="amm-input" id="ammNewTokenAddr" placeholder="0x...">
+</div>
+<button class="amm-btn amm-btn-primary amm-btn-block" id="ammCreatePoolBtn">Create pool</button>
+<p class="amm-hint">Tip: paste the address of a token you made with a token factory, or any existing ERC-20 on Arc Testnet.</p>
+<div class="amm-status" id="ammCreateStatus"></div>
+</div>
+</div>
+</div>
+<div id="ammTabPortfolio" style="display:none;">
+<div class="amm-card">
+<div id="ammPortfolioGate" class="amm-gate">
+<p>Connect your wallet to see your portfolio.</p>
+<button class="amm-btn amm-btn-primary" id="ammConnectFromPortfolio">Connect wallet</button>
+</div>
+<div id="ammPortfolioContent" style="display:none;">
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
+<p class="amm-title" style="margin:0;">Your portfolio</p>
+<button class="amm-btn amm-btn-ghost" id="ammRefreshPortfolio" style="padding:8px 12px; font-size:12.5px;">Refresh</button>
+</div>
+<p class="amm-sub">Your LP positions across every pool, valued in USDC at current pool prices.</p>
+<div id="ammPortfolioTotal" style="font-family:var(--mono); font-size:26px; font-weight:700; margin-bottom:16px;">-</div>
+<div id="ammPortfolioList"><div class="amm-empty">Loading...</div></div>
+</div>
+</div>
+</div>
+<div class="amm-footer">
+Testnet only, no real monetary value. 0.30% swap fee stays in each pool.<br>
+<a href="https://faucet.circle.com" target="_blank" rel="noopener">Get test USDC</a> &middot;
+<a href="https://testnet.arcscan.app" target="_blank" rel="noopener">Block explorer</a><br>
+<a href="https://www.arc.network" target="_blank" rel="noopener">Arc website</a> &middot;
+<a href="https://www.arc.network/blog" target="_blank" rel="noopener">Arc blog</a> &middot;
+<a href="https://x.com/arc" target="_blank" rel="noopener">Arc on X</a> &middot;
+<a href="https://discord.gg/buildonarc" target="_blank" rel="noopener">Arc Discord</a>
+</div>
+</div>
+</div>
 <script>
 (function(){
-  const FACTORY_ADDRESS = "0x23b75F40727045C2B25c496bd26c85974B74DBBa";
-  const ARC_RPC_URL = "https://rpc.testnet.arc.network";
-  const EXPLORER_URL = "https://testnet.arcscan.app";
+const FACTORY_ADDRESS = "0x23b75F40727045C2B25c496bd26c85974B74DBBa";
+const ARC_RPC_URL = "https://rpc.testnet.arc.network";
+const EXPLORER_URL = "https://testnet.arcscan.app";
+const ARC_CHAIN_ID_DEC = 5042002;
+const ARC_CHAIN_ID_HEX = "0x" + ARC_CHAIN_ID_DEC.toString(16);
+const ARC_PARAMS = {
+chainId: ARC_CHAIN_ID_HEX,
+chainName: "Arc Testnet",
+nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 },
+rpcUrls: [ARC_RPC_URL],
+blockExplorerUrls: [EXPLORER_URL]
+};
+const FACTORY_ABI = [
+"function createPool(address) returns (address)",
+"function getAllPoolsCount() view returns (uint256)",
+"function getPool(uint256) view returns (tuple(address pool,address token,string tokenSymbol,address creator,uint256 createdAt))"
+];
+const TOKEN_FACTORY_ADDRESS = "0x84B454606DEfcb64b3e76aa6C7bA3b07c8B0c948";
+const TOKEN_FACTORY_ABI = [
+"function createToken(string,string,uint256) returns (address)",
+"function getTokensByCreator(address) view returns (uint256[])",
+"function getToken(uint256) view returns (tuple(address tokenAddress,address creator,string name,string symbol,uint256 initialSupply,uint256 createdAt))",
+"event TokenCreated(address indexed tokenAddress, address indexed creator, string name, string symbol, uint256 initialSupply)"
+];
+const POOL_ABI = [
+"function usdcReserve() view returns (uint256)",
+"function tokenReserve() view returns (uint256)",
+"function totalSupply() view returns (uint256)",
+"function balanceOf(address) view returns (uint256)",
+"function addLiquidity(uint256) payable returns (uint256)",
+"function zapIn(uint256) payable returns (uint256)",
+"function removeLiquidity(uint256) returns (uint256,uint256)",
+"function swapUSDCForToken(uint256) payable returns (uint256)",
+"function swapTokenForUSDC(uint256,uint256) returns (uint256)",
+"event LiquidityAdded(address indexed provider, uint256 usdcIn, uint256 tokenIn, uint256 shares)",
+"event LiquidityRemoved(address indexed provider, uint256 usdcOut, uint256 tokenOut, uint256 shares)",
+"event Swap(address indexed trader, bool usdcIn, uint256 amountIn, uint256 amountOut)",
+"event ZappedIn(address indexed provider, uint256 usdcIn, uint256 shares)"
+];
+const ERC20_ABI = [
+"function approve(address,uint256) returns (bool)",
+"function allowance(address,address) view returns (uint256)",
+"function balanceOf(address) view returns (uint256)",
+"function decimals() view returns (uint8)"
+];
 
-  const ARC_CHAIN_ID_DEC = 5042002;
-  const ARC_CHAIN_ID_HEX = "0x" + ARC_CHAIN_ID_DEC.toString(16);
-  const ARC_PARAMS = {
-    chainId: ARC_CHAIN_ID_HEX,
-    chainName: "Arc Testnet",
-    nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 },
-    rpcUrls: [ARC_RPC_URL],
-    blockExplorerUrls: [EXPLORER_URL]
-  };
+const readProvider = new ethers.JsonRpcProvider(ARC_RPC_URL, undefined, { batchMaxCount: 1 });
 
-  const FACTORY_ABI = [
-    "function createPool(address) returns (address)",
-    "function getAllPoolsCount() view returns (uint256)",
-    "function getPool(uint256) view returns (tuple(address pool,address token,string tokenSymbol,address creator,uint256 createdAt))"
-  ];
-  const TOKEN_FACTORY_ADDRESS = "0x84B454606DEfcb64b3e76aa6C7bA3b07c8B0c948";
-  const TOKEN_FACTORY_ABI = [
-    "function createToken(string,string,uint256) returns (address)",
-    "function getTokensByCreator(address) view returns (uint256[])",
-    "function getToken(uint256) view returns (tuple(address tokenAddress,address creator,string name,string symbol,uint256 initialSupply,uint256 createdAt))",
-    "event TokenCreated(address indexed tokenAddress, address indexed creator, string name, string symbol, uint256 initialSupply)"
-  ];
-  const POOL_ABI = [
-    "function usdcReserve() view returns (uint256)",
-    "function tokenReserve() view returns (uint256)",
-    "function totalSupply() view returns (uint256)",
-    "function balanceOf(address) view returns (uint256)",
-    "function addLiquidity(uint256) payable returns (uint256)",
-    "function zapIn(uint256) payable returns (uint256)",
-    "function removeLiquidity(uint256) returns (uint256,uint256)",
-    "function swapUSDCForToken(uint256) payable returns (uint256)",
-    "function swapTokenForUSDC(uint256,uint256) returns (uint256)",
-    "event LiquidityAdded(address indexed provider, uint256 usdcIn, uint256 tokenIn, uint256 shares)",
-    "event LiquidityRemoved(address indexed provider, uint256 usdcOut, uint256 tokenOut, uint256 shares)",
-    "event Swap(address indexed trader, bool usdcIn, uint256 amountIn, uint256 amountOut)",
-    "event ZappedIn(address indexed provider, uint256 usdcIn, uint256 shares)"
-  ];
-  const ERC20_ABI = [
-    "function approve(address,uint256) returns (bool)",
-    "function allowance(address,address) view returns (uint256)",
-    "function balanceOf(address) view returns (uint256)",
-    "function decimals() view returns (uint8)"
-  ];
-
-  const readProvider = new ethers.JsonRpcProvider(ARC_RPC_URL);
-
-  async function getRecentFromBlock(){
-    try{
-      const latest = await readProvider.getBlockNumber();
-      return Math.max(0, latest - 20000);
-    }catch(e){
-      return 0;
-    }
-  }
-  const readFactory = new ethers.Contract(FACTORY_ADDRESS, FACTORY_ABI, readProvider);
-
-  let provider, signer, account, factoryC;
-  let connected = false;
-  const tokenDecimalsCache = {};
-
-  const el = (id) => document.getElementById(id);
-  function short(a){ return a ? a.slice(0,6) + '...' + a.slice(-4) : ''; }
-  function fmt(raw, decimals){
-    try{
-      const s = ethers.formatUnits(raw, decimals == null ? 18 : decimals);
-      const n = Number(s);
-      if(!isFinite(n)) return s;
-      return n.toLocaleString(undefined, { maximumFractionDigits: 4 });
-    }catch(e){ return raw.toString(); }
-  }
-
-  async function getTokenDecimals(tokenAddr){
-    if(tokenDecimalsCache[tokenAddr] !== undefined) return tokenDecimalsCache[tokenAddr];
-    try{
-      const c = new ethers.Contract(tokenAddr, ERC20_ABI, readProvider);
-      const d = Number(await c.decimals());
-      tokenDecimalsCache[tokenAddr] = d;
-      return d;
-    }catch(e){
-      tokenDecimalsCache[tokenAddr] = 18;
-      return 18;
-    }
-  }
-
-  function setStatus(elm, kind, msg){
-    elm.className = 'amm-status show ' + kind;
-    elm.textContent = msg;
-  }
-
-  // ---------- Connect ----------
-  async function ensureArcNetwork(){
-    const cid = await window.ethereum.request({ method: 'eth_chainId' });
-    if(cid === ARC_CHAIN_ID_HEX) return true;
-    try{
-      await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: ARC_CHAIN_ID_HEX }] });
-      return true;
-    }catch(err){
-      if(err.code === 4902){
-        try{
-          await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [ARC_PARAMS] });
-          return true;
-        }catch(e2){ return false; }
-      }
-      return false;
-    }
-  }
-
-  function renderConnectedPill(){
-    el('ammConnectArea').innerHTML =
-      '<div class="amm-connected-pill"><span class="amm-dot"></span><span>' + short(account) + '</span></div>';
-  }
-
-  function renderDisconnected(){
-    connected = false;
-    account = null;
-    el('ammConnectArea').innerHTML = '<button class="amm-btn amm-connect-btn" id="ammConnectBtn">Connect wallet</button>';
-    el('ammConnectBtn').addEventListener('click', connect);
-    el('ammCreateGate').style.display = 'block';
-    el('ammCreateContent').style.display = 'none';
-    el('ammPortfolioGate').style.display = 'block';
-    el('ammPortfolioContent').style.display = 'none';
-    el('ammLaunchGate').style.display = 'block';
-    el('ammLaunchContent').style.display = 'none';
-    loadPools();
-  }
-
-  let tokenFactoryC;
-
-  async function connect(){
-    if(!window.ethereum){ alert('No Web3 wallet found. Please install MetaMask.'); return; }
-    try{
-      await window.ethereum.request({ method: 'eth_requestAccounts' });
-      await ensureArcNetwork();
-      provider = new ethers.BrowserProvider(window.ethereum);
-      signer = await provider.getSigner();
-      account = await signer.getAddress();
-      factoryC = new ethers.Contract(FACTORY_ADDRESS, FACTORY_ABI, signer);
-      tokenFactoryC = new ethers.Contract(TOKEN_FACTORY_ADDRESS, TOKEN_FACTORY_ABI, signer);
-      connected = true;
-
-      renderConnectedPill();
-      el('ammCreateGate').style.display = 'none';
-      el('ammCreateContent').style.display = 'block';
-      el('ammPortfolioGate').style.display = 'none';
-      el('ammPortfolioContent').style.display = 'block';
-      el('ammLaunchGate').style.display = 'none';
-      el('ammLaunchContent').style.display = 'block';
-
-      await loadPools();
-    }catch(e){
-      alert('Connection failed: ' + (e.message || e));
-    }
-  }
-
-  el('ammConnectBtn').addEventListener('click', connect);
-  el('ammConnectFromCreate').addEventListener('click', connect);
-  el('ammConnectFromPortfolio').addEventListener('click', connect);
-  el('ammConnectFromLaunch').addEventListener('click', connect);
-
-  if(window.ethereum){
-    window.ethereum.on('accountsChanged', function(accounts){
-      if(!accounts || accounts.length === 0){ renderDisconnected(); }
-      else if(connected){ connect(); }
-    });
-    window.ethereum.on('chainChanged', function(){ if(connected) location.reload(); });
-  }
-
-  // ---------- Tabs ----------
-  function switchAmmTab(tabName){
-    document.querySelectorAll('.amm-tab').forEach(function(t){
-      t.classList.toggle('active', t.dataset.tab === tabName);
-    });
-    ['Pools','Launch','Create','Portfolio'].forEach(function(name){
-      el('ammTab' + name).style.display = (tabName === name.toLowerCase()) ? 'block' : 'none';
-    });
-    if(tabName === 'portfolio') loadPortfolio();
-  }
-
-  document.querySelectorAll('.amm-tab').forEach(function(tab){
-    tab.addEventListener('click', function(){ switchAmmTab(tab.dataset.tab); });
-  });
-
-  // ---------- Create token ----------
-  el('ammLaunchBtn').addEventListener('click', async function(){
-    const statusEl = el('ammLaunchStatus');
-    clearStatusEl(statusEl);
-    const name = el('ammLaunchName').value.trim();
-    const symbol = el('ammLaunchSymbol').value.trim();
-    const supplyStr = el('ammLaunchSupply').value.trim();
-
-    if(!name){ setStatus(statusEl, 'err', 'Enter a token name.'); return; }
-    if(!symbol){ setStatus(statusEl, 'err', 'Enter a token symbol.'); return; }
-    if(!supplyStr || isNaN(Number(supplyStr)) || Number(supplyStr) <= 0){ setStatus(statusEl, 'err', 'Enter a valid initial supply.'); return; }
-
-    try{
-      const supplyWei = ethers.parseUnits(supplyStr, 18);
-      setStatus(statusEl, 'pending', 'Waiting for confirmation...');
-      const tx = await tokenFactoryC.createToken(name, symbol, supplyWei);
-      setStatus(statusEl, 'pending', 'Transaction sent, confirming...');
-      const receipt = await tx.wait();
-
-      let newTokenAddr = null;
-      for(const log of receipt.logs){
-        try{
-          const parsed = tokenFactoryC.interface.parseLog(log);
-          if(parsed && parsed.name === 'TokenCreated'){ newTokenAddr = parsed.args.tokenAddress; break; }
-        }catch(e){}
-      }
-
-      if(!newTokenAddr){
-        try{
-          const indices = await tokenFactoryC.getTokensByCreator(account);
-          if(indices.length > 0){
-            const info = await tokenFactoryC.getToken(indices[indices.length - 1]);
-            newTokenAddr = info.tokenAddress;
-          }
-        }catch(e){}
-      }
-
-      setStatus(statusEl, 'ok', 'Token created' + (newTokenAddr ? (': ' + newTokenAddr) : '!'));
-      el('ammLaunchDoneBox').style.display = 'block';
-      el('ammLaunchDoneBox').dataset.tokenAddr = newTokenAddr || '';
-    }catch(e){
-      setStatus(statusEl, 'err', 'Error: ' + (e.shortMessage || e.message || e));
-    }
-  });
-
-  el('ammLaunchCreatePoolBtn').addEventListener('click', function(){
-    const tokenAddr = el('ammLaunchDoneBox').dataset.tokenAddr;
-    if(tokenAddr){ el('ammNewTokenAddr').value = tokenAddr; }
-    switchAmmTab('create');
-  });
-
-  function clearStatusEl(elm){
-    elm.className = 'amm-status';
-    elm.textContent = '';
-  }
-
-  // ---------- Pools ----------
-  function renderPool(idx, info){
-    const div = document.createElement('div');
-    div.className = 'amm-pool';
-    div.dataset.search = (info.tokenSymbol + ' ' + info.token + ' ' + info.pool).toLowerCase();
-    const pid = 'p' + idx;
-
-    div.innerHTML =
-      '<div class="amm-pool-head">' +
-        '<div>' +
-          '<div class="amm-pool-name">USDC / ' + info.tokenSymbol + '</div>' +
-          '<div class="amm-pool-meta">' + short(info.pool) + ' - token ' + short(info.token) + '</div>' +
-        '</div>' +
-        '<a class="amm-btn amm-btn-ghost" style="padding:7px 11px; font-size:12px; text-decoration:none;" href="' + EXPLORER_URL + '/address/' + info.pool + '" target="_blank" rel="noopener">View</a>' +
-      '</div>' +
-      '<div class="amm-pool-reserves" id="ammReserves' + pid + '">Loading reserves...</div>' +
-      '<div class="amm-subtabs">' +
-        '<button class="amm-subtab active" data-sub="swap" data-pid="' + pid + '">Swap</button>' +
-        '<button class="amm-subtab" data-sub="add" data-pid="' + pid + '">Add liquidity</button>' +
-        '<button class="amm-subtab" data-sub="zap" data-pid="' + pid + '">Zap (USDC only)</button>' +
-        '<button class="amm-subtab" data-sub="remove" data-pid="' + pid + '">Remove</button>' +
-        '<button class="amm-subtab" data-sub="chart" data-pid="' + pid + '">Chart</button>' +
-      '</div>' +
-      '<div class="amm-sub-swap" data-pid="' + pid + '">' +
-        '<div class="amm-dir-row" data-pid="' + pid + '">' +
-          '<button class="amm-dir-btn active" data-dir="toToken" data-pid="' + pid + '">USDC -&gt; ' + info.tokenSymbol + '</button>' +
-          '<button class="amm-dir-btn" data-dir="toUsdc" data-pid="' + pid + '">' + info.tokenSymbol + ' -&gt; USDC</button>' +
-        '</div>' +
-        '<div class="amm-field">' +
-          '<span class="amm-label" id="ammSwapFromLabel' + pid + '">You pay (USDC)</span>' +
-          '<input class="amm-input" placeholder="0.00" inputmode="decimal" id="ammSwapAmt' + pid + '">' +
-        '</div>' +
-        '<p class="amm-hint" id="ammSwapEstimate' + pid + '" style="margin:0 0 12px;">Enter an amount to see what you will receive.</p>' +
-        '<button class="amm-btn amm-btn-primary amm-btn-block" data-swap-execute="' + pid + '">Swap</button>' +
-      '</div>' +
-      '<div class="amm-sub-add" data-pid="' + pid + '" style="display:none;">' +
-        '<div class="amm-row">' +
-          '<input class="amm-input" placeholder="USDC amount" inputmode="decimal" id="ammAddUsdc' + pid + '">' +
-          '<input class="amm-input" placeholder="' + info.tokenSymbol + ' amount" inputmode="decimal" id="ammAddToken' + pid + '">' +
-          '<button class="amm-btn amm-btn-primary" data-add-liq="' + pid + '">Add</button>' +
-        '</div>' +
-        '<p class="amm-hint">If the pool already has reserves, only amounts matching the current ratio will be used.</p>' +
-      '</div>' +
-      '<div class="amm-sub-zap" data-pid="' + pid + '" style="display:none;">' +
-        '<div class="amm-row">' +
-          '<input class="amm-input" placeholder="USDC amount" inputmode="decimal" id="ammZapAmt' + pid + '">' +
-          '<button class="amm-btn amm-btn-primary" data-zap="' + pid + '">Zap in</button>' +
-        '</div>' +
-        '<p class="amm-hint">Half is swapped for ' + info.tokenSymbol + ' automatically, then both are deposited as liquidity. Requires the pool to already have reserves.</p>' +
-      '</div>' +
-      '<div class="amm-sub-remove" data-pid="' + pid + '" style="display:none;">' +
-        '<p class="amm-hint" style="margin-top:0;" id="ammLpBal' + pid + '">Connect your wallet to see your LP balance.</p>' +
-        '<div class="amm-row">' +
-          '<input class="amm-input" placeholder="LP amount to remove" inputmode="decimal" id="ammRemoveAmt' + pid + '">' +
-          '<button class="amm-btn amm-btn-ghost" data-remove-liq="' + pid + '">Remove</button>' +
-        '</div>' +
-      '</div>' +
-      '<div class="amm-sub-chart" data-pid="' + pid + '" style="display:none;" id="ammChart' + pid + '">' +
-        '<p class="amm-hint" style="margin:0;">Click Chart again to load.</p>' +
-      '</div>' +
-      '<div class="amm-status" id="ammStatus' + pid + '"></div>';
-
-
-    return div;
-  }
-
-  const poolReservesCache = {};
-  const swapDirection = {};
-
-  async function refreshPoolReserves(pid, poolAddr, tokenSymbol, tokenAddr){
-    try{
-      const poolC = new ethers.Contract(poolAddr, POOL_ABI, readProvider);
-      const tokenDecimals = await getTokenDecimals(tokenAddr);
-      const usdcR = await poolC.usdcReserve();
-      const tokenR = await poolC.tokenReserve();
-      let priceStr = 'no liquidity yet';
-      if(usdcR > 0n && tokenR > 0n){
-        const price = Number(ethers.formatUnits(usdcR, 18)) / Number(ethers.formatUnits(tokenR, tokenDecimals));
-        priceStr = price.toFixed(6) + ' USDC per ' + tokenSymbol;
-      }
-      el('ammReserves' + pid).innerHTML = 'USDC <b>' + fmt(usdcR) + '</b> - ' + tokenSymbol + ' <b>' + fmt(tokenR, tokenDecimals) + '</b> - ' + priceStr;
-      poolReservesCache[pid] = { usdcR, tokenR, tokenSymbol, tokenDecimals };
-      updateSwapEstimate(pid);
-
-      if(connected){
-        const lpBal = await poolC.balanceOf(account);
-        el('ammLpBal' + pid).textContent = 'Your LP balance: ' + fmt(lpBal);
-      }
-    }catch(e){
-      el('ammReserves' + pid).textContent = 'Could not load reserves.';
-    }
-  }
-
-  function estimateSwapOut(amountInWei, reserveIn, reserveOut){
-    if(amountInWei <= 0n || reserveIn <= 0n || reserveOut <= 0n) return null;
-    const amountInWithFee = amountInWei * 9970n;
-    return (amountInWithFee * reserveOut) / (reserveIn * 10000n + amountInWithFee);
-  }
-
-  function updateSwapEstimate(pid){
-    const cache = poolReservesCache[pid];
-    const estEl = el('ammSwapEstimate' + pid);
-    if(!estEl) return;
-    const dir = swapDirection[pid] || 'toToken';
-    const amtStr = (el('ammSwapAmt' + pid) || {}).value;
-    if(!cache || !amtStr || isNaN(Number(amtStr)) || Number(amtStr) <= 0){
-      estEl.textContent = 'Enter an amount to see what you will receive.';
-      return;
-    }
-    try{
-      const inDecimals = dir === 'toToken' ? 18 : cache.tokenDecimals;
-      const outDecimals = dir === 'toToken' ? cache.tokenDecimals : 18;
-      const amtWei = ethers.parseUnits(amtStr, inDecimals);
-      let outWei;
-      if(dir === 'toToken'){
-        outWei = estimateSwapOut(amtWei, cache.usdcR, cache.tokenR);
-      } else {
-        outWei = estimateSwapOut(amtWei, cache.tokenR, cache.usdcR);
-      }
-      if(outWei === null){
-        estEl.textContent = 'No liquidity in this pool yet.';
-        return;
-      }
-      const outLabel = dir === 'toToken' ? cache.tokenSymbol : 'USDC';
-      estEl.textContent = 'You will receive about ' + fmt(outWei, outDecimals) + ' ' + outLabel;
-    }catch(e){
-      estEl.textContent = 'Enter an amount to see what you will receive.';
-    }
-  }
-
-
-  async function loadPools(){
-    const list = el('ammPoolsList');
-    list.innerHTML = '<div class="amm-empty">Loading...</div>';
-    try{
-      const count = Number(await readFactory.getAllPoolsCount());
-      if(count === 0){
-        list.innerHTML = '<div class="amm-empty">No pools yet. Create the first one!</div>';
-        return;
-      }
-      list.innerHTML = '';
-      const infos = [];
-      for(let i = count - 1; i >= 0; i--){
-        const info = await readFactory.getPool(i);
-        infos.push({ idx: i, info });
-        list.appendChild(renderPool(i, info));
-      }
-      wirePoolActions();
-      for(const item of infos){
-        await refreshPoolReserves('p' + item.idx, item.info.pool, item.info.tokenSymbol, item.info.token);
-      }
-    }catch(e){
-      list.innerHTML = '<div class="amm-empty">Could not load pools: ' + (e.shortMessage || e.message || e) + '</div>';
-    }
-  }
-  el('ammRefresh').addEventListener('click', loadPools);
-  el('ammPoolSearch').addEventListener('input', function(){
-    const q = el('ammPoolSearch').value.trim().toLowerCase();
-    document.querySelectorAll('#ammPoolsList > .amm-pool').forEach(function(card){
-      const match = !q || (card.dataset.search || '').indexOf(q) !== -1;
-      card.style.display = match ? '' : 'none';
-    });
-  });
-
-  function wirePoolActions(){
-    document.querySelectorAll('.amm-subtab').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        const pid = btn.dataset.pid;
-        document.querySelectorAll('.amm-subtab[data-pid="' + pid + '"]').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        ['swap','add','zap','remove','chart'].forEach(function(name){
-          const section = document.querySelector('.amm-sub-' + name + '[data-pid="' + pid + '"]');
-          if(section) section.style.display = (btn.dataset.sub === name) ? 'block' : 'none';
-        });
-        if(btn.dataset.sub === 'chart'){
-          loadChartForPid(pid);
-        }
-      });
-    });
-
-    async function loadChartForPid(pid){
-      const container = el('ammChart' + pid);
-      container.innerHTML = '<p class="amm-hint" style="margin:0;">Loading chart...</p>';
-      try{
-        const info = await getPoolInfo(pid);
-        const points = await buildPriceHistory(info.pool, info.token);
-        container.innerHTML = renderChartSVG(points);
-      }catch(e){
-        container.innerHTML = '<p class="amm-hint" style="margin:0;">Could not load chart: ' + (e.shortMessage || e.message || e) + '</p>';
-      }
-    }
-
-    async function getPoolInfo(pid){
-      const idx = Number(pid.slice(1));
-      return await readFactory.getPool(idx);
-    }
-
-    document.querySelectorAll('.amm-dir-btn').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        const pid = btn.dataset.pid;
-        swapDirection[pid] = btn.dataset.dir;
-        document.querySelectorAll('.amm-dir-btn[data-pid="' + pid + '"]').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const cache = poolReservesCache[pid];
-        const symbol = cache ? cache.tokenSymbol : 'token';
-        el('ammSwapFromLabel' + pid).textContent = btn.dataset.dir === 'toToken' ? 'You pay (USDC)' : 'You pay (' + symbol + ')';
-        updateSwapEstimate(pid);
-      });
-    });
-
-    document.querySelectorAll('[id^="ammSwapAmt"]').forEach(function(input){
-      const pid = input.id.replace('ammSwapAmt', '');
-      input.addEventListener('input', function(){ updateSwapEstimate(pid); });
-    });
-
-    document.querySelectorAll('[data-swap-execute]').forEach(function(btn){
-      btn.addEventListener('click', async function(){
-        const pid = btn.dataset.swapExecute;
-        const statusEl = el('ammStatus' + pid);
-        if(!connected){ connect(); return; }
-        const amt = el('ammSwapAmt' + pid).value.trim();
-        if(!amt || isNaN(Number(amt)) || Number(amt) <= 0){ setStatus(statusEl, 'err', 'Enter a valid amount.'); return; }
-        const dir = swapDirection[pid] || 'toToken';
-        try{
-          const info = await getPoolInfo(pid);
-          if(dir === 'toToken'){
-            const poolC = new ethers.Contract(info.pool, POOL_ABI, signer);
-            setStatus(statusEl, 'pending', 'Waiting for confirmation...');
-            const tx = await poolC.swapUSDCForToken(0, { value: ethers.parseUnits(amt, 18) });
-            await tx.wait();
-          } else {
-            const tokenC = new ethers.Contract(info.token, ERC20_ABI, signer);
-            const poolC = new ethers.Contract(info.pool, POOL_ABI, signer);
-            const tokenDecimals = await getTokenDecimals(info.token);
-            const amtWei = ethers.parseUnits(amt, tokenDecimals);
-            const allowance = await tokenC.allowance(account, info.pool);
-            if(allowance < amtWei){
-              setStatus(statusEl, 'pending', 'Approving token...');
-              const approveTx = await tokenC.approve(info.pool, amtWei);
-              await approveTx.wait();
-            }
-            setStatus(statusEl, 'pending', 'Waiting for confirmation...');
-            const tx = await poolC.swapTokenForUSDC(amtWei, 0);
-            await tx.wait();
-          }
-          setStatus(statusEl, 'ok', 'Swapped!');
-          el('ammSwapAmt' + pid).value = '';
-          await refreshPoolReserves(pid, info.pool, info.tokenSymbol, info.token);
-        }catch(e){ setStatus(statusEl, 'err', 'Error: ' + (e.shortMessage || e.message || e)); }
-      });
-    });
-
-    document.querySelectorAll('[data-add-liq]').forEach(function(btn){
-      btn.addEventListener('click', async function(){
-        const pid = btn.dataset.addLiq;
-        const statusEl = el('ammStatus' + pid);
-        if(!connected){ connect(); return; }
-        const usdcAmt = el('ammAddUsdc' + pid).value.trim();
-        const tokenAmt = el('ammAddToken' + pid).value.trim();
-        if(!usdcAmt || !tokenAmt || isNaN(Number(usdcAmt)) || isNaN(Number(tokenAmt)) || Number(usdcAmt) <= 0 || Number(tokenAmt) <= 0){
-          setStatus(statusEl, 'err', 'Enter valid amounts for both.'); return;
-        }
-        try{
-          const info = await getPoolInfo(pid);
-          const tokenC = new ethers.Contract(info.token, ERC20_ABI, signer);
-          const poolC = new ethers.Contract(info.pool, POOL_ABI, signer);
-          const tokenDecimals = await getTokenDecimals(info.token);
-          const tokenWei = ethers.parseUnits(tokenAmt, tokenDecimals);
-          const allowance = await tokenC.allowance(account, info.pool);
-          if(allowance < tokenWei){
-            setStatus(statusEl, 'pending', 'Approving token...');
-            const approveTx = await tokenC.approve(info.pool, tokenWei);
-            await approveTx.wait();
-          }
-          setStatus(statusEl, 'pending', 'Waiting for confirmation...');
-          const tx = await poolC.addLiquidity(tokenWei, { value: ethers.parseUnits(usdcAmt, 18) });
-          await tx.wait();
-          setStatus(statusEl, 'ok', 'Liquidity added!');
-          await refreshPoolReserves(pid, info.pool, info.tokenSymbol, info.token);
-        }catch(e){ setStatus(statusEl, 'err', 'Error: ' + (e.shortMessage || e.message || e)); }
-      });
-    });
-
-    document.querySelectorAll('[data-zap]').forEach(function(btn){
-      btn.addEventListener('click', async function(){
-        const pid = btn.dataset.zap;
-        const statusEl = el('ammStatus' + pid);
-        if(!connected){ connect(); return; }
-        const amt = el('ammZapAmt' + pid).value.trim();
-        if(!amt || isNaN(Number(amt)) || Number(amt) <= 0){ setStatus(statusEl, 'err', 'Enter a valid amount.'); return; }
-        try{
-          const info = await getPoolInfo(pid);
-          const poolC = new ethers.Contract(info.pool, POOL_ABI, signer);
-          setStatus(statusEl, 'pending', 'Waiting for confirmation...');
-          const tx = await poolC.zapIn(0, { value: ethers.parseUnits(amt, 18) });
-          await tx.wait();
-          setStatus(statusEl, 'ok', 'Zapped in!');
-          await refreshPoolReserves(pid, info.pool, info.tokenSymbol, info.token);
-        }catch(e){ setStatus(statusEl, 'err', 'Error: ' + (e.shortMessage || e.message || e)); }
-      });
-    });
-
-    document.querySelectorAll('[data-remove-liq]').forEach(function(btn){
-      btn.addEventListener('click', async function(){
-        const pid = btn.dataset.removeLiq;
-        const statusEl = el('ammStatus' + pid);
-        if(!connected){ connect(); return; }
-        const amt = el('ammRemoveAmt' + pid).value.trim();
-        if(!amt || isNaN(Number(amt)) || Number(amt) <= 0){ setStatus(statusEl, 'err', 'Enter a valid amount.'); return; }
-        try{
-          const info = await getPoolInfo(pid);
-          const poolC = new ethers.Contract(info.pool, POOL_ABI, signer);
-          setStatus(statusEl, 'pending', 'Waiting for confirmation...');
-          const tx = await poolC.removeLiquidity(ethers.parseUnits(amt, 18));
-          await tx.wait();
-          setStatus(statusEl, 'ok', 'Liquidity removed!');
-          await refreshPoolReserves(pid, info.pool, info.tokenSymbol, info.token);
-        }catch(e){ setStatus(statusEl, 'err', 'Error: ' + (e.shortMessage || e.message || e)); }
-      });
-    });
-  }
-
-  // ---------- Create pool ----------
-  el('ammCreatePoolBtn').addEventListener('click', async function(){
-    const statusEl = el('ammCreateStatus');
-    const tokenAddr = el('ammNewTokenAddr').value.trim();
-    if(!/^0x[a-fA-F0-9]{40}$/.test(tokenAddr)){ setStatus(statusEl, 'err', 'Enter a valid token contract address.'); return; }
-    try{
-      setStatus(statusEl, 'pending', 'Waiting for confirmation...');
-      const tx = await factoryC.createPool(tokenAddr);
-      setStatus(statusEl, 'pending', 'Transaction sent, confirming...');
-      await tx.wait();
-      setStatus(statusEl, 'ok', 'Pool created! Check the Pools tab to add liquidity.');
-      el('ammNewTokenAddr').value = '';
-      await loadPools();
-    }catch(e){
-      setStatus(statusEl, 'err', 'Error: ' + (e.shortMessage || e.message || e));
-    }
-  });
-
-  // ---------- Portfolio ----------
-  async function loadPortfolio(){
-    if(!connected) return;
-    const list = el('ammPortfolioList');
-    const totalEl = el('ammPortfolioTotal');
-    list.innerHTML = '<div class="amm-empty">Loading...</div>';
-    totalEl.textContent = '-';
-    try{
-      const count = Number(await readFactory.getAllPoolsCount());
-      const rows = [];
-      let totalUsdcValue = 0;
-      for(let i = 0; i < count; i++){
-        const info = await readFactory.getPool(i);
-        const poolC = new ethers.Contract(info.pool, POOL_ABI, readProvider);
-        const tokenDecimals = await getTokenDecimals(info.token);
-        const lpBal = await poolC.balanceOf(account);
-        const supply = await poolC.totalSupply();
-        const usdcR = await poolC.usdcReserve();
-        const tokenR = await poolC.tokenReserve();
-        if(lpBal === 0n) continue;
-        const usdcShare = supply > 0n ? (lpBal * usdcR) / supply : 0n;
-        const tokenShare = supply > 0n ? (lpBal * tokenR) / supply : 0n;
-        let tokenValueInUsdc = 0n;
-        if(tokenR > 0n){
-          tokenValueInUsdc = (tokenShare * usdcR) / tokenR;
-        }
-        const positionUsdcValue = usdcShare + tokenValueInUsdc;
-        totalUsdcValue += Number(ethers.formatUnits(positionUsdcValue, 18));
-        rows.push({ info, lpBal, usdcShare, tokenShare, positionUsdcValue, tokenDecimals });
-      }
-
-      totalEl.textContent = '~' + totalUsdcValue.toLocaleString(undefined, { maximumFractionDigits: 2 }) + ' USDC';
-
-      if(rows.length === 0){
-        list.innerHTML = '<div class="amm-empty">You do not have any liquidity positions yet.</div>';
-        return;
-      }
-      list.innerHTML = '';
-      rows.forEach(function(r){
-        const row = document.createElement('div');
-        row.className = 'amm-pool';
-        row.innerHTML =
-          '<div class="amm-pool-head">' +
-            '<div>' +
-              '<div class="amm-pool-name">USDC / ' + r.info.tokenSymbol + '</div>' +
-              '<div class="amm-pool-meta">LP balance: ' + fmt(r.lpBal) + '</div>' +
-            '</div>' +
-            '<div style="font-family:var(--mono); font-weight:700;">~' + Number(ethers.formatUnits(r.positionUsdcValue, 18)).toLocaleString(undefined, { maximumFractionDigits: 2 }) + ' USDC</div>' +
-          '</div>' +
-          '<div class="amm-pool-reserves">Redeemable: <b>' + fmt(r.usdcShare) + '</b> USDC + <b>' + fmt(r.tokenShare, r.tokenDecimals) + '</b> ' + r.info.tokenSymbol + '</div>';
-        list.appendChild(row);
-      });
-    }catch(e){
-      list.innerHTML = '<div class="amm-empty">Could not load portfolio.</div>';
-    }
-  }
-  el('ammRefreshPortfolio').addEventListener('click', loadPortfolio);
-
-  // ---------- Price chart ----------
-  async function buildPriceHistory(poolAddr, tokenAddr){
-    const poolC = new ethers.Contract(poolAddr, POOL_ABI, readProvider);
-    const tokenDecimals = await getTokenDecimals(tokenAddr);
-    const fromBlock = await getRecentFromBlock();
-    const swaps = await poolC.queryFilter(poolC.filters.Swap(), fromBlock);
-    const adds = await poolC.queryFilter(poolC.filters.LiquidityAdded(), fromBlock);
-    const zaps = await poolC.queryFilter(poolC.filters.ZappedIn(), fromBlock);
-    const removes = await poolC.queryFilter(poolC.filters.LiquidityRemoved(), fromBlock);
-    let all = [];
-    swaps.forEach(function(ev){ all.push({ kind: 'swap', ev }); });
-    adds.forEach(function(ev){ all.push({ kind: 'add', ev }); });
-    zaps.forEach(function(ev){ all.push({ kind: 'zap', ev }); });
-    removes.forEach(function(ev){ all.push({ kind: 'remove', ev }); });
-    all.sort(function(a, b){
-      if(a.ev.blockNumber !== b.ev.blockNumber) return a.ev.blockNumber - b.ev.blockNumber;
-      return a.ev.index - b.ev.index;
-    });
-
-    let usdcR = 0n, tokenR = 0n;
-    const points = [];
-    all.forEach(function(item){
-      const a = item.ev.args;
-      if(item.kind === 'add'){
-        usdcR += a.usdcIn; tokenR += a.tokenIn;
-      } else if(item.kind === 'zap'){
-        usdcR += a.usdcIn;
-      } else if(item.kind === 'remove'){
-        usdcR -= a.usdcOut; tokenR -= a.tokenOut;
-      } else if(item.kind === 'swap'){
-        if(a.usdcIn){ usdcR += a.amountIn; tokenR -= a.amountOut; }
-        else { tokenR += a.amountIn; usdcR -= a.amountOut; }
-      }
-      if(usdcR > 0n && tokenR > 0n){
-        const price = Number(ethers.formatUnits(usdcR, 18)) / Number(ethers.formatUnits(tokenR, tokenDecimals));
-        points.push(price);
-      }
-    });
-    return points;
-  }
-
-  function renderChartSVG(points){
-    if(points.length < 2){
-      return '<p class="amm-hint" style="margin:0;">Not enough activity yet to draw a price chart.</p>';
-    }
-    const w = 560, h = 140, pad = 8;
-    const min = Math.min.apply(null, points);
-    const max = Math.max.apply(null, points);
-    const range = (max - min) || 1;
-    const stepX = (w - pad * 2) / (points.length - 1);
-    const coords = points.map(function(p, i){
-      const x = pad + i * stepX;
-      const y = h - pad - ((p - min) / range) * (h - pad * 2);
-      return x.toFixed(1) + ',' + y.toFixed(1);
-    });
-    const last = points[points.length - 1];
-    return '<svg viewBox="0 0 ' + w + ' ' + h + '" width="100%" height="140" preserveAspectRatio="none">' +
-      '<polyline points="' + coords.join(' ') + '" fill="none" stroke="#3f8cff" stroke-width="2"/>' +
-      '</svg>' +
-      '<p class="amm-hint" style="margin-top:4px;">Latest price: ' + last.toFixed(6) + ' USDC per token (' + points.length + ' data points)</p>';
-  }
-
-  loadPools();
+async function getRecentFromBlock(){
+try{
+const latest = await readProvider.getBlockNumber();
+return Math.max(0, latest - 20000);
+}catch(e){
+return 0;
+}
+}
+const readFactory = new ethers.Contract(FACTORY_ADDRESS, FACTORY_ABI, readProvider);
+let provider, signer, account, factoryC;
+let connected = false;
+const tokenDecimalsCache = {};
+const el = (id) => document.getElementById(id);
+function short(a){ return a ? a.slice(0,6) + '...' + a.slice(-4) : ''; }
+function fmt(raw, decimals){
+try{
+const s = ethers.formatUnits(raw, decimals == null ? 18 : decimals);
+const n = Number(s);
+if(!isFinite(n)) return s;
+return n.toLocaleString(undefined, { maximumFractionDigits: 4 });
+}catch(e){ return raw.toString(); }
+}
+async function getTokenDecimals(tokenAddr){
+if(tokenDecimalsCache[tokenAddr] !== undefined) return tokenDecimalsCache[tokenAddr];
+try{
+const c = new ethers.Contract(tokenAddr, ERC20_ABI, readProvider);
+const d = Number(await c.decimals());
+tokenDecimalsCache[tokenAddr] = d;
+return d;
+}catch(e){
+tokenDecimalsCache[tokenAddr] = 18;
+return 18;
+}
+}
+function setStatus(elm, kind, msg){
+elm.className = 'amm-status show ' + kind;
+elm.textContent = msg;
+}
+// ---------- Connect ----------
+async function ensureArcNetwork(){
+const cid = await window.ethereum.request({ method: 'eth_chainId' });
+if(cid === ARC_CHAIN_ID_HEX) return true;
+try{
+await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: ARC_CHAIN_ID_HEX }] });
+return true;
+}catch(err){
+if(err.code === 4902){
+try{
+await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [ARC_PARAMS] });
+return true;
+}catch(e2){ return false; }
+}
+return false;
+}
+}
+function renderConnectedPill(){
+el('ammConnectArea').innerHTML =
+'<div class="amm-connected-pill"><span class="amm-dot"></span><span>' + short(account) + '</span></div>';
+}
+function renderDisconnected(){
+connected = false;
+account = null;
+el('ammConnectArea').innerHTML = '<button class="amm-btn amm-connect-btn" id="ammConnectBtn">Connect wallet</button>';
+el('ammConnectBtn').addEventListener('click', connect);
+el('ammCreateGate').style.display = 'block';
+el('ammCreateContent').style.display = 'none';
+el('ammPortfolioGate').style.display = 'block';
+el('ammPortfolioContent').style.display = 'none';
+el('ammLaunchGate').style.display = 'block';
+el('ammLaunchContent').style.display = 'none';
+loadPools();
+}
+let tokenFactoryC;
+async function connect(){
+if(!window.ethereum){ alert('No Web3 wallet found. Please install MetaMask.'); return; }
+try{
+await window.ethereum.request({ method: 'eth_requestAccounts' });
+await ensureArcNetwork();
+provider = new ethers.BrowserProvider(window.ethereum);
+signer = await provider.getSigner();
+account = await signer.getAddress();
+factoryC = new ethers.Contract(FACTORY_ADDRESS, FACTORY_ABI, signer);
+tokenFactoryC = new ethers.Contract(TOKEN_FACTORY_ADDRESS, TOKEN_FACTORY_ABI, signer);
+connected = true;
+renderConnectedPill();
+el('ammCreateGate').style.display = 'none';
+el('ammCreateContent').style.display = 'block';
+el('ammPortfolioGate').style.display = 'none';
+el('ammPortfolioContent').style.display = 'block';
+el('ammLaunchGate').style.display = 'none';
+el('ammLaunchContent').style.display = 'block';
+await loadPools();
+}catch(e){
+alert('Connection failed: ' + (e.message || e));
+}
+}
+el('ammConnectBtn').addEventListener('click', connect);
+el('ammConnectFromCreate').addEventListener('click', connect);
+el('ammConnectFromPortfolio').addEventListener('click', connect);
+el('ammConnectFromLaunch').addEventListener('click', connect);
+if(window.ethereum){
+window.ethereum.on('accountsChanged', function(accounts){
+if(!accounts || accounts.length === 0){ renderDisconnected(); }
+else if(connected){ connect(); }
+});
+window.ethereum.on('chainChanged', function(){ if(connected) location.reload(); });
+}
+// ---------- Tabs ----------
+function switchAmmTab(tabName){
+document.querySelectorAll('.amm-tab').forEach(function(t){
+t.classList.toggle('active', t.dataset.tab === tabName);
+});
+['Pools','Launch','Create','Portfolio'].forEach(function(name){
+el('ammTab' + name).style.display = (tabName === name.toLowerCase()) ? 'block' : 'none';
+});
+if(tabName === 'portfolio') loadPortfolio();
+}
+document.querySelectorAll('.amm-tab').forEach(function(tab){
+tab.addEventListener('click', function(){ switchAmmTab(tab.dataset.tab); });
+});
+// ---------- Create token ----------
+el('ammLaunchBtn').addEventListener('click', async function(){
+const statusEl = el('ammLaunchStatus');
+clearStatusEl(statusEl);
+const name = el('ammLaunchName').value.trim();
+const symbol = el('ammLaunchSymbol').value.trim();
+const supplyStr = el('ammLaunchSupply').value.trim();
+if(!name){ setStatus(statusEl, 'err', 'Enter a token name.'); return; }
+if(!symbol){ setStatus(statusEl, 'err', 'Enter a token symbol.'); return; }
+if(!supplyStr || isNaN(Number(supplyStr)) || Number(supplyStr) <= 0){ setStatus(statusEl, 'err', 'Enter a valid initial supply.'); return; }
+try{
+const supplyWei = ethers.parseUnits(supplyStr, 18);
+setStatus(statusEl, 'pending', 'Waiting for confirmation...');
+const tx = await tokenFactoryC.createToken(name, symbol, supplyWei);
+setStatus(statusEl, 'pending', 'Transaction sent, confirming...');
+const receipt = await tx.wait();
+let newTokenAddr = null;
+for(const log of receipt.logs){
+try{
+const parsed = tokenFactoryC.interface.parseLog(log);
+if(parsed && parsed.name === 'TokenCreated'){ newTokenAddr = parsed.args.tokenAddress; break; }
+}catch(e){}
+}
+if(!newTokenAddr){
+try{
+const indices = await tokenFactoryC.getTokensByCreator(account);
+if(indices.length > 0){
+const info = await tokenFactoryC.getToken(indices[indices.length - 1]);
+newTokenAddr = info.tokenAddress;
+}
+}catch(e){}
+}
+setStatus(statusEl, 'ok', 'Token created' + (newTokenAddr ? (': ' + newTokenAddr) : '!'));
+el('ammLaunchDoneBox').style.display = 'block';
+el('ammLaunchDoneBox').dataset.tokenAddr = newTokenAddr || '';
+}catch(e){
+setStatus(statusEl, 'err', 'Error: ' + (e.shortMessage || e.message || e));
+}
+});
+el('ammLaunchCreatePoolBtn').addEventListener('click', function(){
+const tokenAddr = el('ammLaunchDoneBox').dataset.tokenAddr;
+if(tokenAddr){ el('ammNewTokenAddr').value = tokenAddr; }
+switchAmmTab('create');
+});
+function clearStatusEl(elm){
+elm.className = 'amm-status';
+elm.textContent = '';
+}
+// ---------- Pools ----------
+function renderPool(idx, info){
+const div = document.createElement('div');
+div.className = 'amm-pool';
+div.dataset.search = (info.tokenSymbol + ' ' + info.token + ' ' + info.pool).toLowerCase();
+const pid = 'p' + idx;
+div.innerHTML =
+'<div class="amm-pool-head">' +
+'<div>' +
+'<div class="amm-pool-name">USDC / ' + info.tokenSymbol + '</div>' +
+'<div class="amm-pool-meta">' + short(info.pool) + ' - token ' + short(info.token) + '</div>' +
+'</div>' +
+'<a class="amm-btn amm-btn-ghost" style="padding:7px 11px; font-size:12px; text-decoration:none;" href="' + EXPLORER_URL + '/address/' + info.pool + '" target="_blank" rel="noopener">View</a>' +
+'</div>' +
+'<div class="amm-pool-reserves" id="ammReserves' + pid + '">Loading reserves...</div>' +
+'<div class="amm-subtabs">' +
+'<button class="amm-subtab active" data-sub="swap" data-pid="' + pid + '">Swap</button>' +
+'<button class="amm-subtab" data-sub="add" data-pid="' + pid + '">Add liquidity</button>' +
+'<button class="amm-subtab" data-sub="zap" data-pid="' + pid + '">Zap (USDC only)</button>' +
+'<button class="amm-subtab" data-sub="remove" data-pid="' + pid + '">Remove</button>' +
+'<button class="amm-subtab" data-sub="chart" data-pid="' + pid + '">Chart</button>' +
+'</div>' +
+'<div class="amm-sub-swap" data-pid="' + pid + '">' +
+'<div class="amm-dir-row" data-pid="' + pid + '">' +
+'<button class="amm-dir-btn active" data-dir="toToken" data-pid="' + pid + '">USDC -&gt; ' + info.tokenSymbol + '</button>' +
+'<button class="amm-dir-btn" data-dir="toUsdc" data-pid="' + pid + '">' + info.tokenSymbol + ' -&gt; USDC</button>' +
+'</div>' +
+'<div class="amm-field">' +
+'<span class="amm-label" id="ammSwapFromLabel' + pid + '">You pay (USDC)</span>' +
+'<input class="amm-input" placeholder="0.00" inputmode="decimal" id="ammSwapAmt' + pid + '">' +
+'</div>' +
+'<p class="amm-hint" id="ammSwapEstimate' + pid + '" style="margin:0 0 12px;">Enter an amount to see what you will receive.</p>' +
+'<button class="amm-btn amm-btn-primary amm-btn-block" data-swap-execute="' + pid + '">Swap</button>' +
+'</div>' +
+'<div class="amm-sub-add" data-pid="' + pid + '" style="display:none;">' +
+'<div class="amm-row">' +
+'<input class="amm-input" placeholder="USDC amount" inputmode="decimal" id="ammAddUsdc' + pid + '">' +
+'<input class="amm-input" placeholder="' + info.tokenSymbol + ' amount" inputmode="decimal" id="ammAddToken' + pid + '">' +
+'<button class="amm-btn amm-btn-primary" data-add-liq="' + pid + '">Add</button>' +
+'</div>' +
+'<p class="amm-hint">If the pool already has reserves, only amounts matching the current ratio will be used.</p>' +
+'</div>' +
+'<div class="amm-sub-zap" data-pid="' + pid + '" style="display:none;">' +
+'<div class="amm-row">' +
+'<input class="amm-input" placeholder="USDC amount" inputmode="decimal" id="ammZapAmt' + pid + '">' +
+'<button class="amm-btn amm-btn-primary" data-zap="' + pid + '">Zap in</button>' +
+'</div>' +
+'<p class="amm-hint">Half is swapped for ' + info.tokenSymbol + ' automatically, then both are deposited as liquidity. Requires the pool to already have reserves.</p>' +
+'</div>' +
+'<div class="amm-sub-remove" data-pid="' + pid + '" style="display:none;">' +
+'<p class="amm-hint" style="margin-top:0;" id="ammLpBal' + pid + '">Connect your wallet to see your LP balance.</p>' +
+'<div class="amm-row">' +
+'<input class="amm-input" placeholder="LP amount to remove" inputmode="decimal" id="ammRemoveAmt' + pid + '">' +
+'<button class="amm-btn amm-btn-ghost" data-remove-liq="' + pid + '">Remove</button>' +
+'</div>' +
+'</div>' +
+'<div class="amm-sub-chart" data-pid="' + pid + '" style="display:none;" id="ammChart' + pid + '">' +
+'<p class="amm-hint" style="margin:0;">Click Chart again to load.</p>' +
+'</div>' +
+'<div class="amm-status" id="ammStatus' + pid + '"></div>';
+return div;
+}
+const poolReservesCache = {};
+const swapDirection = {};
+async function refreshPoolReserves(pid, poolAddr, tokenSymbol, tokenAddr){
+try{
+const poolC = new ethers.Contract(poolAddr, POOL_ABI, readProvider);
+const tokenDecimals = await getTokenDecimals(tokenAddr);
+const usdcR = await poolC.usdcReserve();
+const tokenR = await poolC.tokenReserve();
+let priceStr = 'no liquidity yet';
+if(usdcR > 0n && tokenR > 0n){
+const price = Number(ethers.formatUnits(usdcR, 18)) / Number(ethers.formatUnits(tokenR, tokenDecimals));
+priceStr = price.toFixed(6) + ' USDC per ' + tokenSymbol;
+}
+el('ammReserves' + pid).innerHTML = 'USDC <b>' + fmt(usdcR) + '</b> - ' + tokenSymbol + ' <b>' + fmt(tokenR, tokenDecimals) + '</b> - ' + priceStr;
+poolReservesCache[pid] = { usdcR, tokenR, tokenSymbol, tokenDecimals };
+updateSwapEstimate(pid);
+if(connected){
+const lpBal = await poolC.balanceOf(account);
+el('ammLpBal' + pid).textContent = 'Your LP balance: ' + fmt(lpBal);
+}
+}catch(e){
+el('ammReserves' + pid).textContent = 'Could not load reserves.';
+}
+}
+function estimateSwapOut(amountInWei, reserveIn, reserveOut){
+if(amountInWei <= 0n || reserveIn <= 0n || reserveOut <= 0n) return null;
+const amountInWithFee = amountInWei * 9970n;
+return (amountInWithFee * reserveOut) / (reserveIn * 10000n + amountInWithFee);
+}
+function updateSwapEstimate(pid){
+const cache = poolReservesCache[pid];
+const estEl = el('ammSwapEstimate' + pid);
+if(!estEl) return;
+const dir = swapDirection[pid] || 'toToken';
+const amtStr = (el('ammSwapAmt' + pid) || {}).value;
+if(!cache || !amtStr || isNaN(Number(amtStr)) || Number(amtStr) <= 0){
+estEl.textContent = 'Enter an amount to see what you will receive.';
+return;
+}
+try{
+const inDecimals = dir === 'toToken' ? 18 : cache.tokenDecimals;
+const outDecimals = dir === 'toToken' ? cache.tokenDecimals : 18;
+const amtWei = ethers.parseUnits(amtStr, inDecimals);
+let outWei;
+if(dir === 'toToken'){
+outWei = estimateSwapOut(amtWei, cache.usdcR, cache.tokenR);
+} else {
+outWei = estimateSwapOut(amtWei, cache.tokenR, cache.usdcR);
+}
+if(outWei === null){
+estEl.textContent = 'No liquidity in this pool yet.';
+return;
+}
+const outLabel = dir === 'toToken' ? cache.tokenSymbol : 'USDC';
+estEl.textContent = 'You will receive about ' + fmt(outWei, outDecimals) + ' ' + outLabel;
+}catch(e){
+estEl.textContent = 'Enter an amount to see what you will receive.';
+}
+}
+async function loadPools(){
+const list = el('ammPoolsList');
+list.innerHTML = '<div class="amm-empty">Loading...</div>';
+try{
+const count = Number(await readFactory.getAllPoolsCount());
+if(count === 0){
+list.innerHTML = '<div class="amm-empty">No pools yet. Create the first one!</div>';
+return;
+}
+list.innerHTML = '';
+const infos = [];
+for(let i = count - 1; i >= 0; i--){
+const info = await readFactory.getPool(i);
+infos.push({ idx: i, info });
+list.appendChild(renderPool(i, info));
+}
+wirePoolActions();
+for(const item of infos){
+await refreshPoolReserves('p' + item.idx, item.info.pool, item.info.tokenSymbol, item.info.token);
+}
+}catch(e){
+list.innerHTML = '<div class="amm-empty">Could not load pools: ' + (e.shortMessage || e.message || e) + '</div>';
+}
+}
+el('ammRefresh').addEventListener('click', loadPools);
+el('ammPoolSearch').addEventListener('input', function(){
+const q = el('ammPoolSearch').value.trim().toLowerCase();
+document.querySelectorAll('#ammPoolsList > .amm-pool').forEach(function(card){
+const match = !q || (card.dataset.search || '').indexOf(q) !== -1;
+card.style.display = match ? '' : 'none';
+});
+});
+function wirePoolActions(){
+document.querySelectorAll('.amm-subtab').forEach(function(btn){
+btn.addEventListener('click', function(){
+const pid = btn.dataset.pid;
+document.querySelectorAll('.amm-subtab[data-pid="' + pid + '"]').forEach(b => b.classList.remove('active'));
+btn.classList.add('active');
+['swap','add','zap','remove','chart'].forEach(function(name){
+const section = document.querySelector('.amm-sub-' + name + '[data-pid="' + pid + '"]');
+if(section) section.style.display = (btn.dataset.sub === name) ? 'block' : 'none';
+});
+if(btn.dataset.sub === 'chart'){
+loadChartForPid(pid);
+}
+});
+});
+async function loadChartForPid(pid){
+const container = el('ammChart' + pid);
+container.innerHTML = '<p class="amm-hint" style="margin:0;">Loading chart...</p>';
+try{
+const info = await getPoolInfo(pid);
+const points = await buildPriceHistory(info.pool, info.token);
+container.innerHTML = renderChartSVG(points);
+}catch(e){
+container.innerHTML = '<p class="amm-hint" style="margin:0;">Could not load chart: ' + (e.shortMessage || e.message || e) + '</p>';
+}
+}
+async function getPoolInfo(pid){
+const idx = Number(pid.slice(1));
+return await readFactory.getPool(idx);
+}
+document.querySelectorAll('.amm-dir-btn').forEach(function(btn){
+btn.addEventListener('click', function(){
+const pid = btn.dataset.pid;
+swapDirection[pid] = btn.dataset.dir;
+document.querySelectorAll('.amm-dir-btn[data-pid="' + pid + '"]').forEach(b => b.classList.remove('active'));
+btn.classList.add('active');
+const cache = poolReservesCache[pid];
+const symbol = cache ? cache.tokenSymbol : 'token';
+el('ammSwapFromLabel' + pid).textContent = btn.dataset.dir === 'toToken' ? 'You pay (USDC)' : 'You pay (' + symbol + ')';
+updateSwapEstimate(pid);
+});
+});
+document.querySelectorAll('[id^="ammSwapAmt"]').forEach(function(input){
+const pid = input.id.replace('ammSwapAmt', '');
+input.addEventListener('input', function(){ updateSwapEstimate(pid); });
+});
+document.querySelectorAll('[data-swap-execute]').forEach(function(btn){
+btn.addEventListener('click', async function(){
+const pid = btn.dataset.swapExecute;
+const statusEl = el('ammStatus' + pid);
+if(!connected){ connect(); return; }
+const amt = el('ammSwapAmt' + pid).value.trim();
+if(!amt || isNaN(Number(amt)) || Number(amt) <= 0){ setStatus(statusEl, 'err', 'Enter a valid amount.'); return; }
+const dir = swapDirection[pid] || 'toToken';
+try{
+const info = await getPoolInfo(pid);
+if(dir === 'toToken'){
+const poolC = new ethers.Contract(info.pool, POOL_ABI, signer);
+setStatus(statusEl, 'pending', 'Waiting for confirmation...');
+const tx = await poolC.swapUSDCForToken(0, { value: ethers.parseUnits(amt, 18) });
+await tx.wait();
+} else {
+const tokenC = new ethers.Contract(info.token, ERC20_ABI, signer);
+const poolC = new ethers.Contract(info.pool, POOL_ABI, signer);
+const tokenDecimals = await getTokenDecimals(info.token);
+const amtWei = ethers.parseUnits(amt, tokenDecimals);
+const allowance = await tokenC.allowance(account, info.pool);
+if(allowance < amtWei){
+setStatus(statusEl, 'pending', 'Approving token...');
+const approveTx = await tokenC.approve(info.pool, amtWei);
+await approveTx.wait();
+}
+setStatus(statusEl, 'pending', 'Waiting for confirmation...');
+const tx = await poolC.swapTokenForUSDC(amtWei, 0);
+await tx.wait();
+}
+setStatus(statusEl, 'ok', 'Swapped!');
+el('ammSwapAmt' + pid).value = '';
+await refreshPoolReserves(pid, info.pool, info.tokenSymbol, info.token);
+}catch(e){ setStatus(statusEl, 'err', 'Error: ' + (e.shortMessage || e.message || e)); }
+});
+});
+document.querySelectorAll('[data-add-liq]').forEach(function(btn){
+btn.addEventListener('click', async function(){
+const pid = btn.dataset.addLiq;
+const statusEl = el('ammStatus' + pid);
+if(!connected){ connect(); return; }
+const usdcAmt = el('ammAddUsdc' + pid).value.trim();
+const tokenAmt = el('ammAddToken' + pid).value.trim();
+if(!usdcAmt || !tokenAmt || isNaN(Number(usdcAmt)) || isNaN(Number(tokenAmt)) || Number(usdcAmt) <= 0 || Number(tokenAmt) <= 0){
+setStatus(statusEl, 'err', 'Enter valid amounts for both.'); return;
+}
+try{
+const info = await getPoolInfo(pid);
+const tokenC = new ethers.Contract(info.token, ERC20_ABI, signer);
+const poolC = new ethers.Contract(info.pool, POOL_ABI, signer);
+const tokenDecimals = await getTokenDecimals(info.token);
+const tokenWei = ethers.parseUnits(tokenAmt, tokenDecimals);
+const allowance = await tokenC.allowance(account, info.pool);
+if(allowance < tokenWei){
+setStatus(statusEl, 'pending', 'Approving token...');
+const approveTx = await tokenC.approve(info.pool, tokenWei);
+await approveTx.wait();
+}
+setStatus(statusEl, 'pending', 'Waiting for confirmation...');
+const tx = await poolC.addLiquidity(tokenWei, { value: ethers.parseUnits(usdcAmt, 18) });
+await tx.wait();
+setStatus(statusEl, 'ok', 'Liquidity added!');
+await refreshPoolReserves(pid, info.pool, info.tokenSymbol, info.token);
+}catch(e){ setStatus(statusEl, 'err', 'Error: ' + (e.shortMessage || e.message || e)); }
+});
+});
+document.querySelectorAll('[data-zap]').forEach(function(btn){
+btn.addEventListener('click', async function(){
+const pid = btn.dataset.zap;
+const statusEl = el('ammStatus' + pid);
+if(!connected){ connect(); return; }
+const amt = el('ammZapAmt' + pid).value.trim();
+if(!amt || isNaN(Number(amt)) || Number(amt) <= 0){ setStatus(statusEl, 'err', 'Enter a valid amount.'); return; }
+try{
+const info = await getPoolInfo(pid);
+const poolC = new ethers.Contract(info.pool, POOL_ABI, signer);
+setStatus(statusEl, 'pending', 'Waiting for confirmation...');
+const tx = await poolC.zapIn(0, { value: ethers.parseUnits(amt, 18) });
+await tx.wait();
+setStatus(statusEl, 'ok', 'Zapped in!');
+await refreshPoolReserves(pid, info.pool, info.tokenSymbol, info.token);
+}catch(e){ setStatus(statusEl, 'err', 'Error: ' + (e.shortMessage || e.message || e)); }
+});
+});
+document.querySelectorAll('[data-remove-liq]').forEach(function(btn){
+btn.addEventListener('click', async function(){
+const pid = btn.dataset.removeLiq;
+const statusEl = el('ammStatus' + pid);
+if(!connected){ connect(); return; }
+const amt = el('ammRemoveAmt' + pid).value.trim();
+if(!amt || isNaN(Number(amt)) || Number(amt) <= 0){ setStatus(statusEl, 'err', 'Enter a valid amount.'); return; }
+try{
+const info = await getPoolInfo(pid);
+const poolC = new ethers.Contract(info.pool, POOL_ABI, signer);
+setStatus(statusEl, 'pending', 'Waiting for confirmation...');
+const tx = await poolC.removeLiquidity(ethers.parseUnits(amt, 18));
+await tx.wait();
+setStatus(statusEl, 'ok', 'Liquidity removed!');
+await refreshPoolReserves(pid, info.pool, info.tokenSymbol, info.token);
+}catch(e){ setStatus(statusEl, 'err', 'Error: ' + (e.shortMessage || e.message || e)); }
+});
+});
+}
+// ---------- Create pool ----------
+el('ammCreatePoolBtn').addEventListener('click', async function(){
+const statusEl = el('ammCreateStatus');
+const tokenAddr = el('ammNewTokenAddr').value.trim();
+if(!/^0x[a-fA-F0-9]{40}$/.test(tokenAddr)){ setStatus(statusEl, 'err', 'Enter a valid token contract address.'); return; }
+try{
+setStatus(statusEl, 'pending', 'Waiting for confirmation...');
+const tx = await factoryC.createPool(tokenAddr);
+setStatus(statusEl, 'pending', 'Transaction sent, confirming...');
+await tx.wait();
+setStatus(statusEl, 'ok', 'Pool created! Check the Pools tab to add liquidity.');
+el('ammNewTokenAddr').value = '';
+await loadPools();
+}catch(e){
+setStatus(statusEl, 'err', 'Error: ' + (e.shortMessage || e.message || e));
+}
+});
+// ---------- Portfolio ----------
+async function loadPortfolio(){
+if(!connected) return;
+const list = el('ammPortfolioList');
+const totalEl = el('ammPortfolioTotal');
+list.innerHTML = '<div class="amm-empty">Loading...</div>';
+totalEl.textContent = '-';
+try{
+const count = Number(await readFactory.getAllPoolsCount());
+const rows = [];
+let totalUsdcValue = 0;
+for(let i = 0; i < count; i++){
+const info = await readFactory.getPool(i);
+const poolC = new ethers.Contract(info.pool, POOL_ABI, readProvider);
+const tokenDecimals = await getTokenDecimals(info.token);
+const lpBal = await poolC.balanceOf(account);
+const supply = await poolC.totalSupply();
+const usdcR = await poolC.usdcReserve();
+const tokenR = await poolC.tokenReserve();
+if(lpBal === 0n) continue;
+const usdcShare = supply > 0n ? (lpBal * usdcR) / supply : 0n;
+const tokenShare = supply > 0n ? (lpBal * tokenR) / supply : 0n;
+let tokenValueInUsdc = 0n;
+if(tokenR > 0n){
+tokenValueInUsdc = (tokenShare * usdcR) / tokenR;
+}
+const positionUsdcValue = usdcShare + tokenValueInUsdc;
+totalUsdcValue += Number(ethers.formatUnits(positionUsdcValue, 18));
+rows.push({ info, lpBal, usdcShare, tokenShare, positionUsdcValue, tokenDecimals });
+}
+totalEl.textContent = '~' + totalUsdcValue.toLocaleString(undefined, { maximumFractionDigits: 2 }) + ' USDC';
+if(rows.length === 0){
+list.innerHTML = '<div class="amm-empty">You do not have any liquidity positions yet.</div>';
+return;
+}
+list.innerHTML = '';
+rows.forEach(function(r){
+const row = document.createElement('div');
+row.className = 'amm-pool';
+row.innerHTML =
+'<div class="amm-pool-head">' +
+'<div>' +
+'<div class="amm-pool-name">USDC / ' + r.info.tokenSymbol + '</div>' +
+'<div class="amm-pool-meta">LP balance: ' + fmt(r.lpBal) + '</div>' +
+'</div>' +
+'<div style="font-family:var(--mono); font-weight:700;">~' + Number(ethers.formatUnits(r.positionUsdcValue, 18)).toLocaleString(undefined, { maximumFractionDigits: 2 }) + ' USDC</div>' +
+'</div>' +
+'<div class="amm-pool-reserves">Redeemable: <b>' + fmt(r.usdcShare) + '</b> USDC + <b>' + fmt(r.tokenShare, r.tokenDecimals) + '</b> ' + r.info.tokenSymbol + '</div>';
+list.appendChild(row);
+});
+}catch(e){
+list.innerHTML = '<div class="amm-empty">Could not load portfolio.</div>';
+}
+}
+el('ammRefreshPortfolio').addEventListener('click', loadPortfolio);
+// ---------- Price chart ----------
+async function buildPriceHistory(poolAddr, tokenAddr){
+const poolC = new ethers.Contract(poolAddr, POOL_ABI, readProvider);
+const tokenDecimals = await getTokenDecimals(tokenAddr);
+const fromBlock = await getRecentFromBlock();
+const swaps = await poolC.queryFilter(poolC.filters.Swap(), fromBlock);
+const adds = await poolC.queryFilter(poolC.filters.LiquidityAdded(), fromBlock);
+const zaps = await poolC.queryFilter(poolC.filters.ZappedIn(), fromBlock);
+const removes = await poolC.queryFilter(poolC.filters.LiquidityRemoved(), fromBlock);
+let all = [];
+swaps.forEach(function(ev){ all.push({ kind: 'swap', ev }); });
+adds.forEach(function(ev){ all.push({ kind: 'add', ev }); });
+zaps.forEach(function(ev){ all.push({ kind: 'zap', ev }); });
+removes.forEach(function(ev){ all.push({ kind: 'remove', ev }); });
+all.sort(function(a, b){
+if(a.ev.blockNumber !== b.ev.blockNumber) return a.ev.blockNumber - b.ev.blockNumber;
+return a.ev.index - b.ev.index;
+});
+let usdcR = 0n, tokenR = 0n;
+const points = [];
+all.forEach(function(item){
+const a = item.ev.args;
+if(item.kind === 'add'){
+usdcR += a.usdcIn; tokenR += a.tokenIn;
+} else if(item.kind === 'zap'){
+usdcR += a.usdcIn;
+} else if(item.kind === 'remove'){
+usdcR -= a.usdcOut; tokenR -= a.tokenOut;
+} else if(item.kind === 'swap'){
+if(a.usdcIn){ usdcR += a.amountIn; tokenR -= a.amountOut; }
+else { tokenR += a.amountIn; usdcR -= a.amountOut; }
+}
+if(usdcR > 0n && tokenR > 0n){
+const price = Number(ethers.formatUnits(usdcR, 18)) / Number(ethers.formatUnits(tokenR, tokenDecimals));
+points.push(price);
+}
+});
+return points;
+}
+function renderChartSVG(points){
+if(points.length < 2){
+return '<p class="amm-hint" style="margin:0;">Not enough activity yet to draw a price chart.</p>';
+}
+const w = 560, h = 140, pad = 8;
+const min = Math.min.apply(null, points);
+const max = Math.max.apply(null, points);
+const range = (max - min) || 1;
+const stepX = (w - pad * 2) / (points.length - 1);
+const coords = points.map(function(p, i){
+const x = pad + i * stepX;
+const y = h - pad - ((p - min) / range) * (h - pad * 2);
+return x.toFixed(1) + ',' + y.toFixed(1);
+});
+const last = points[points.length - 1];
+return '<svg viewBox="0 0 ' + w + ' ' + h + '" width="100%" height="140" preserveAspectRatio="none">' +
+'<polyline points="' + coords.join(' ') + '" fill="none" stroke="#3f8cff" stroke-width="2"/>' +
+'</svg>' +
+'<p class="amm-hint" style="margin-top:4px;">Latest price: ' + last.toFixed(6) + ' USDC per token (' + points.length + ' data points)</p>';
+}
+loadPools();
 })();
 </script>
 </body>
