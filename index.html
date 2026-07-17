@@ -7,7 +7,7 @@
 <body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.5/ethers.umd.min.js"></script>
 <style>
-html,body{margin:0;background:#f6f4ef;min-height:100%;}
+html,body{margin:0;background:#f6f4ef;min-heighat:100%;}
 :root{
 --ink:#f6f4ef; --surface:#ffffff; --surface-2:#f1efe8; --line:#e3ddd0;
 --mint:#2f5fd8; --mint-dim:#e8edfb; --blue:#2f5fd8;
@@ -774,12 +774,12 @@ let totalUsdcValue = 0;
 for(let i = 0; i < count; i++){
 const info = await readFactory.getPool(i);
 const poolC = new ethers.Contract(info.pool, POOL_ABI, readProvider);
-const tokenDecimals = await getTokenDecimals(info.token);
 const lpBal = await poolC.balanceOf(account);
+if(lpBal === 0n) continue;
+const tokenDecimals = await getTokenDecimals(info.token);
 const supply = await poolC.totalSupply();
 const usdcR = await poolC.usdcReserve();
 const tokenR = await poolC.tokenReserve();
-if(lpBal === 0n) continue;
 const usdcShare = supply > 0n ? (lpBal * usdcR) / supply : 0n;
 const tokenShare = supply > 0n ? (lpBal * tokenR) / supply : 0n;
 let tokenValueInUsdc = 0n;
@@ -811,7 +811,7 @@ row.innerHTML =
 list.appendChild(row);
 });
 }catch(e){
-list.innerHTML = '<div class="amm-empty">Could not load portfolio.</div>';
+list.innerHTML = '<div class="amm-empty">Could not load portfolio: ' + (e.shortMessage || e.message || e) + '</div>';
 }
 }
 el('ammRefreshPortfolio').addEventListener('click', loadPortfolio);
