@@ -351,7 +351,7 @@ if(!window.ethereum){ alert('No Web3 wallet found. Please install MetaMask.'); r
 try{
 await window.ethereum.request({ method: 'eth_requestAccounts' });
 await ensureArcNetwork();
-provider = new ethers.BrowserProvider(window.ethereum);
+provider = new ethers.BrowserProvider(window.ethereum, undefined, { batchMaxCount: 1 });
 signer = await provider.getSigner();
 account = await signer.getAddress();
 factoryC = new ethers.Contract(FACTORY_ADDRESS, FACTORY_ABI, signer);
